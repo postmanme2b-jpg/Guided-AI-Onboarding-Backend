@@ -1,24 +1,28 @@
 # input_handler.py
 import asyncio
 import sys
+from typing import Dict
 
-websocket_input_queue: asyncio.Queue = None
+websocket_input_queues: Dict[str, asyncio.Queue] = None
 
-def set_websocket_input_queue(queue: asyncio.Queue):
+def add_websocket_input_queue(session: str, queue: asyncio.Queue):
     """
     Set the global WebSocket input queue for async input handling.
     This function is called by the server to initialize the queue.
     """
-    global websocket_input_queue
-    websocket_input_queue = queue
+    global websocket_input_queues
+    if websocket_input_queues is None:
+        websocket_input_queues = {}
+    websocket_input_queues[session] = queue
 
-async def async_input(prompt: str = "") -> str:
+async def async_input(prompt: str = "", session: str = None) -> str:
     """
     Asynchronous input function that reads input from the WebSocket or standard input.
     If running in a WebSocket server context, it will read from the WebSocket input queue.
     Otherwise, it will read from standard input.
     """
-    if sys.argv[0] == "server.py":
+    if sys.argv[0] == "server.py" and session is not None:
+        websocket_input_queue = websocket_input_queues.get(session)
         if websocket_input_queue is None:
             raise RuntimeError("websocket_input_queue is not initialized.")
 
@@ -27,11 +31,12 @@ async def async_input(prompt: str = "") -> str:
     else:
         return input(prompt).strip()
 
-async def async_print(output):
+async def async_print(output, session: str = None):
     """
     Asynchronous print function that sends output to the WebSocket.
     """
-
-    print(output, flush=True)
-    if sys.argv[0] == "server.py":
+    if sys.argv[0] == "server.py" and session is not None:
+        print(session + ":" + output, flush=True)
         await asyncio.sleep(0.01)
+    else:
+        print(output, flush=True)

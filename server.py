@@ -6,52 +6,108 @@ This module sets up a FastAPI server with WebSocket support for real-time commun
 """
 
 import sys
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import HTMLResponse
 import uvicorn
 import asyncio
-from utils.input_handler import set_websocket_input_queue
+from utils.input_handler import add_websocket_input_queue
 from agent.architect import ChallengeArchitect
 import json
+from typing import Dict, List
+import time
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-active_websockets: list[WebSocket] = []
+# Allow all origins (for development; restrict in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+active_websockets: Dict[str, WebSocket] = {}
+instances: Dict[str, ChallengeArchitect] = {}
+messages: Dict[str, List[Dict[str, any]]] = {}
 
 original_print_write = sys.stdout.write
 
+def add_message(session_id: str, message: str, role: str = "assistant"):
+    """
+    Add a message to the session's message history.
+    """
+    if session_id not in messages:
+        messages[session_id] = []
+    messages[session_id].append({
+        "role": role,
+        "content": message,
+        "timestamp": int(time.time())
+    })
+
 def custom_stdout_write(s):
-    for websocket in active_websockets:
-        try:
-            asyncio.create_task(websocket.send_text(s))
-        except RuntimeError:
-            pass
+    if ":" in s:
+        session_id, message = s.split(":", 1)
+        add_message(session_id, message)
+        websocket = active_websockets.get(session_id)
+        if websocket:
+            try:
+                asyncio.create_task(websocket.send_text(message))
+            except RuntimeError:
+                pass
+    else:
+        original_print_write(s)
 
 sys.stdout.write = custom_stdout_write
+
+@app.get("/messages")
+async def get_messages(session: str = Query(...)):
+    """
+    HTTP GET endpoint to fetch messages for a given session ID.
+    """
+    return {
+        "session": session,
+        "messages": messages.get(session, [])
+    }
 
 # Endpoint WebSocket
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    active_websockets.append(websocket)
-    asyncio.create_task(ChallengeArchitect().process_challenge())
+    session = websocket.query_params.get("session")
+    active_websockets[session] = websocket
+
+    from utils.input_handler import websocket_input_queues
+    input_queue = (websocket_input_queues or {}).get(session)
+    if input_queue is None:
+        # Create a new input queue for this session
+        input_queue = asyncio.Queue()
+        add_websocket_input_queue(session, input_queue)
+
+    if session not in instances:
+        # Create a new instance of ChallengeArchitect for this session
+        instances[session] = ChallengeArchitect(session=session)
+        asyncio.create_task(instances[session].process_challenge())
 
     try:
         while True:
             data = await websocket.receive_text()
-            from utils.input_handler import websocket_input_queue
-            await websocket_input_queue.put(json.loads(data).get("content") or data)
+            # from utils.input_handler import websocket_input_queue
+            # await websocket_input_queue.put(json.loads(data).get("content") or data)
+            content = json.loads(data).get("content") or data
+            add_message(session, content, role="user")
+            await input_queue.put(content)
     except WebSocketDisconnect:
-        active_websockets.remove(websocket)
+        if active_websockets.get(session) == websocket:
+            print(f"WebSocket disconnected for session: {session}")
+            active_websockets.pop(session, None)
     except Exception as e:
         print(f"Error WebSocket: {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global global_websocket_input_queue_instance
-    global_websocket_input_queue_instance = asyncio.Queue()
-    set_websocket_input_queue(global_websocket_input_queue_instance)
     yield
 
 app.router.lifespan_context = lifespan

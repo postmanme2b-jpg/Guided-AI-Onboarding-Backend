@@ -44,16 +44,16 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
 
     if should_complete:
         # Signal completion with summary of gathered information
-        await async_print("\n🎉 Excellent! We have decided the scope of the challenge.")
-        await async_print("📋 Here's the summary:")
+        await async_print("\n🎉 Excellent! We have decided the scope of the challenge.", session=state["session"])
+        await async_print("📋 Here's the summary:", session=state["session"])
 
         work_scope = analysis.get("work_scope", {})
         suggestions = analysis.get("suggestions", [])
         
         # Display gathered information for user confirmation            
-        await async_print(f"Challenge Type: {work_scope.get('type', 'No type provided')}")
-        await async_print(f"Description: {work_scope.get('description', 'No description provided')}")
-        await async_print(f"Suggestion Reasoning: {json.dumps(analysis.get('suggestions', 'No reasoning provided'), indent=2)}")
+        await async_print(f"Challenge Type: {work_scope.get('type', 'No type provided')}", session=state["session"])
+        await async_print(f"Description: {work_scope.get('description', 'No description provided')}", session=state["session"])
+        await async_print(f"Suggestion Reasoning: {json.dumps(analysis.get('suggestions', 'No reasoning provided'), indent=2)}", session=state["session"])
         
         state["scope"] = work_scope
         state["suggestions_log"] = suggestions
@@ -62,10 +62,10 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
     else:
         # Continue conversation with next question
         
-        await async_print(f"\n🤖 AI: {ai_question}")
+        await async_print(f"\n🤖 AI: {ai_question}", session=state["session"])
         
         # Get next user response
-        user_response = await async_input("\n🧑 You: ")
+        user_response = await async_input("\n🧑 You: ", session=state["session"])
         
         if not user_response:
             user_response = "No, that's all for now."

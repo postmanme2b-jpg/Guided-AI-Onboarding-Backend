@@ -58,18 +58,18 @@ async def generate_spec(state: Dict[str, Any]) -> Dict[str, Any]:
         state["spec"] = spec
         state["reasoning_trace"] = reasoning_trace
 
-        await async_print("\n🎉 Excellent! We have generated the challenge specification.")
-        await async_print("📋 Here's the JSON formatted specification:")
-        await async_print(json.dumps(spec, indent=2))
+        await async_print("\n🎉 Excellent! We have generated the challenge specification.", session=state["session"])
+        await async_print("📋 Here's the JSON formatted specification:", session=state["session"])
+        await async_print(json.dumps(spec, indent=2), session=state["session"])
 
-        await async_print("\n 🧠 Reasoning trace:")
-        await async_print(json.dumps(reasoning_trace, indent=2))
+        await async_print("\n 🧠 Reasoning trace:", session=state["session"])
+        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"])
 
     # Continue conversation with next question
-    await async_print(f"\n🤖 AI: {ai_question}")
+    await async_print(f"\n🤖 AI: {ai_question}", session=state["session"])
     
     # Get next user response
-    user_response = await async_input("\n🧑 You: ")
+    user_response = await async_input("\n🧑 You: ", session=state["session"])
     
     if not user_response:
         user_response = "I'm not sure, can you suggest something?"

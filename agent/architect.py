@@ -45,14 +45,16 @@ class ChallengeArchitect:
     challenge descriptions into structured specifications through interactive AI conversation.
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, session: Optional[str] = None, api_key: Optional[str] = None):
         """
         Initialize the Challenge Architect with LLM models and workflow configuration.
         
         Args:
             api_key: OpenAI API key for LLM access
+            session: Optional session identifier for WebSocket communication
         """
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        self.session = session
         self.llm = ChatOpenAI(model="gpt-4.1", api_key=self.api_key, temperature=0.5)
         self.rag = RAGHelper()
 
@@ -142,30 +144,22 @@ class ChallengeArchitect:
 
     async def print_section(self, title, content, emoji="📋"):
         """Helper function to print formatted sections"""
-        await async_print(f"\n{emoji} {title}")
-        await async_print("=" * (len(title) + 4))
-        await async_print(content)
+        await async_print(f"\n{emoji} {title}", session=self.session)
+        await async_print("=" * (len(title) + 4), session=self.session)
+        await async_print(content, session=self.session)
 
-    async def process_challenge(self, input_data: Dict[str, Any] = None) -> Dict[str, Any]:
+    async def process_challenge(self) -> Dict[str, Any]:
         """
         Process a challenge request and generate a structured spec through interactive AI conversation.
         
         This is the main entry point that orchestrates the entire multi-agent workflow.
         
-        Args:
-            input_data: Optional input containing prompt and files
-            
         Returns:
             Dict containing generated specification, reasoning trace, and conversation history
         """
         
-        # If no input_data provided, get prompt from console
-        if input_data is None:
-            input_data = {}
-            
         # Get prompt from input_data or ask user for input
-        if "prompt" not in input_data or not input_data["prompt"]:
-            await async_print(
+        await async_print(
 """============================================================
 🚀 Welcome to the AI Challenge Spec Generator! 🚀 
 ============================================================
@@ -175,23 +169,19 @@ Examples:
 - 'Create a marketplace for freelance designers'
 - 'Build an AI model to predict stock prices'
 - 'Design a mobile game for kids'
-============================================================""")
-            
-            user_prompt = await async_input("Your challenge description: ")
-            if not user_prompt:
-                user_prompt = "I want to build a food delivery app for students"  # fallback
-                await async_print(f"Using default prompt: {user_prompt}")
-                
-            input_data["prompt"] = user_prompt
+============================================================""", session=self.session)
         
+        user_prompt = await async_input("Your challenge description: ", session=self.session)
+        if not user_prompt:
+            user_prompt = "I want to build a food delivery app for students"  # fallback
+            await async_print(f"Using default prompt: {user_prompt}", session=self.session)
+                    
         # Store the prompt in the class variable so nodes can access it
-        initial_prompt = input_data.get("prompt", "")
+        initial_prompt = user_prompt
         
-        await async_print(f"\n🎯 Processing request: {initial_prompt}")
-        await async_print("=" * 60)
-
         # Initialize the state for the agent workflow
         initial_state = {
+            "session": None, 
             "discuss_scope_conversation": [],
             "generate_spec_conversation": [],
             "discuss_spec_conversation": [],
@@ -205,13 +195,13 @@ Examples:
             "suggestions_log": [],
             "reasoning_trace": [],
             "completed": False,
-
-            "files": input_data.get("files", []),
-            "image_analysis": [],
         }
         
+        if self.session:
+            # If a session is provided, set it in the initial state
+            initial_state["session"] = self.session
         initial_state["discuss_scope_conversation"].append(
-            HumanMessage(content=input_data.get("prompt", ""))
+            HumanMessage(content=initial_prompt)
         )
         # Execute the LangGraph workflow
         final_state = await self.workflow.ainvoke(initial_state)
@@ -219,7 +209,7 @@ Examples:
         await async_print(
 """============================================================
 🎉 CHALLENGE SPECIFICATION COMPLETE!
-============================================================""")
+============================================================""", session=self.session)
 
         # Show the generated specification
         await self.print_section(

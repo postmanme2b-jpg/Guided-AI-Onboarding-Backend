@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Any
-from utils.input_handler import async_print, async_input
+from utils.input_handler import async_print
 
 async def select_schema(state: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -11,13 +11,13 @@ async def select_schema(state: Dict[str, Any]) -> Dict[str, Any]:
 
     type = state["scope"].get('type', 'development')
 
-    await async_print(f"\n 🔎 Finding specification schema for challenge type: {type}...")
+    await async_print(f"\n 🔎 Finding specification schema for challenge type: {type}...", session=state["session"])
 
     # If scope is defined, load the proper schema
     with open("config/platform_schema.json", "r") as f:
         schema_all = json.load(f)
         schema_selected = [item for item in schema_all if item["challenge_type"] == type]
         state["schema"] = schema_selected[0] if len(schema_selected) > 0 else schema_all[0]
-        await async_print(f"🤖 Selected schema: {state['schema']}")
+        await async_print(f"🤖 Selected schema: {state['schema']}", session=state["session"])
 
     return state

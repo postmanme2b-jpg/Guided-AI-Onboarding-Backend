@@ -57,6 +57,9 @@ def custom_stdout_write(s):
                 asyncio.create_task(websocket.send_text(message))
             except RuntimeError:
                 pass
+        else:
+            # If no WebSocket is active, just print to stdout
+            original_print_write(s)
     else:
         original_print_write(s)
 
@@ -77,6 +80,10 @@ async def get_messages(session: str = Query(...)):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     session = websocket.query_params.get("session")
+    if not session:
+        await websocket.close(code=1008, reason="Session ID is required")
+        return
+
     active_websockets[session] = websocket
 
     from utils.input_handler import websocket_input_queues
@@ -94,9 +101,13 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_text()
-            # from utils.input_handler import websocket_input_queue
-            # await websocket_input_queue.put(json.loads(data).get("content") or data)
-            content = json.loads(data).get("content") or data
+            try:
+                content = json.loads(data).get("content")
+            except json.JSONDecodeError:
+                content = data
+            if not content or content.strip() == "":
+                await websocket.send_text("Error: Empty message received.")
+                continue
             add_message(session, content, role="user")
             await input_queue.put(content)
     except WebSocketDisconnect:
@@ -104,7 +115,7 @@ async def websocket_endpoint(websocket: WebSocket):
             print(f"WebSocket disconnected for session: {session}")
             active_websockets.pop(session, None)
     except Exception as e:
-        print(f"Error WebSocket: {e}")
+        print(f"Error While listening from WebSocket. {e}")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

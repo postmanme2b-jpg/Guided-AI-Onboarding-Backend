@@ -5,14 +5,9 @@ Main entry point for the CLI app of the AI Agent Challenge Spec Generator.
 
 import json
 from agent.architect import ChallengeArchitect
-from utils.input_handler import set_websocket_input_queue
 
 async def main():
     try:
-
-        global global_websocket_input_queue_instance # Deklarasikan bahwa kita akan memodifikasi global
-        global_websocket_input_queue_instance = asyncio.Queue()
-        set_websocket_input_queue(global_websocket_input_queue_instance)
 
         # Initialize the architect
         architect = ChallengeArchitect()

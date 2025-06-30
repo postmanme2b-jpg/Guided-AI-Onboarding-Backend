@@ -145,7 +145,7 @@ class ChallengeArchitect:
     async def print_section(self, title, content, emoji="📋"):
         """Helper function to print formatted sections"""
         await async_print(f"\n{emoji} {title}", session=self.session)
-        await async_print("=" * (len(title) + 4), session=self.session)
+        # await async_print("=" * (len(title) + 4), session=self.session)
         await async_print(content, session=self.session)
 
     async def process_challenge(self) -> Dict[str, Any]:
@@ -160,16 +160,13 @@ class ChallengeArchitect:
         
         # Get prompt from input_data or ask user for input
         await async_print(
-"""============================================================
-🚀 Welcome to the AI Challenge Spec Generator! 🚀 
-============================================================
+"""## 🚀 Welcome to the AI Challenge Spec Generator! 🚀 
 Please describe your goal for the challenge.
 Examples:
 - 'I want to build a food delivery app for students'
 - 'Create a marketplace for freelance designers'
 - 'Build an AI model to predict stock prices'
-- 'Design a mobile game for kids'
-============================================================""", session=self.session)
+- 'Design a mobile game for kids'""", session=self.session)
         
         user_prompt = await async_input("Your challenge description: ", session=self.session)
         if not user_prompt:
@@ -206,10 +203,7 @@ Examples:
         # Execute the LangGraph workflow
         final_state = await self.workflow.ainvoke(initial_state)
 
-        await async_print(
-"""============================================================
-🎉 CHALLENGE SPECIFICATION COMPLETE!
-============================================================""", session=self.session)
+        await async_print("## 🎉 CHALLENGE SPECIFICATION GENERATION IS COMPLETED! 🎉", session=self.session)
 
         # Show the generated specification
         await self.print_section(

@@ -50,10 +50,10 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
         work_scope = analysis.get("work_scope", {})
         suggestions = analysis.get("suggestions", [])
         
-        # Display gathered information for user confirmation            
-        await async_print(f"Challenge Type: {work_scope.get('type', 'No type provided')}", session=state["session"])
-        await async_print(f"Description: {work_scope.get('description', 'No description provided')}", session=state["session"])
-        await async_print(f"Suggestion Reasoning: {json.dumps(analysis.get('suggestions', 'No reasoning provided'), indent=2)}", session=state["session"])
+        # Display gathered information for user confirmation
+        await async_print(json.dumps({"challenge_type": work_scope.get('type', 'No type provided')}), session=state["session"])
+        await async_print(json.dumps({"description": work_scope.get('description', 'No description provided')}), session=state["session"])
+        await async_print(json.dumps({"suggestion_reasoning": analysis.get('suggestions', 'No reasoning provided')}), session=state["session"])
         
         state["scope"] = work_scope
         state["suggestions_log"] = suggestions

@@ -18,6 +18,6 @@ async def select_schema(state: Dict[str, Any]) -> Dict[str, Any]:
         schema_all = json.load(f)
         schema_selected = [item for item in schema_all if item["challenge_type"] == type]
         state["schema"] = schema_selected[0] if len(schema_selected) > 0 else schema_all[0]
-        await async_print(f"🤖 Selected schema: {state['schema']}", session=state["session"])
+        await async_print(f"🤖 Selected schema: \n```json\n{json.dumps(state['schema'], indent=2)}\n```", session=state["session"])
 
     return state

@@ -58,12 +58,11 @@ async def generate_spec(state: Dict[str, Any]) -> Dict[str, Any]:
         state["spec"] = spec
         state["reasoning_trace"] = reasoning_trace
 
-        await async_print("\n🎉 Excellent! We have generated the challenge specification.", session=state["session"])
-        await async_print("📋 Here's the JSON formatted specification:", session=state["session"])
+        await async_print("\n🎉 Excellent! We have generated the challenge specification. Here's the formatted specification:", session=state["session"])
         await async_print(json.dumps(spec, indent=2), session=state["session"])
 
-        await async_print("\n 🧠 Reasoning trace:", session=state["session"])
-        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"])
+        await async_print("\n 🧠 Reasoning trace:", session=state["session"], debug_message=True)
+        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"], debug_message=True)
 
     # Continue conversation with next question
     await async_print(f"\n🤖 AI: {ai_question}", session=state["session"])

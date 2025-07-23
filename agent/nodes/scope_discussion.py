@@ -44,8 +44,7 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
 
     if should_complete:
         # Signal completion with summary of gathered information
-        await async_print("\n🎉 Excellent! We have decided the scope of the challenge.", session=state["session"])
-        await async_print("📋 Here's the summary:", session=state["session"])
+        await async_print("\n🎉 Excellent! We have decided the scope of the challenge. Here's the summary:", session=state["session"])
 
         work_scope = analysis.get("work_scope", {})
         suggestions = analysis.get("suggestions", [])
@@ -53,7 +52,7 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
         # Display gathered information for user confirmation
         await async_print(json.dumps({"challenge_type": work_scope.get('type', 'No type provided')}), session=state["session"])
         await async_print(json.dumps({"description": work_scope.get('description', 'No description provided')}), session=state["session"])
-        await async_print(json.dumps({"suggestion_reasoning": analysis.get('suggestions', 'No reasoning provided')}), session=state["session"])
+        await async_print(json.dumps({"suggestion_reasoning": analysis.get('suggestions', 'No reasoning provided')}), session=state["session"], debug_message=True)
         
         state["scope"] = work_scope
         state["suggestions_log"] = suggestions

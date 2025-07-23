@@ -31,12 +31,12 @@ async def async_input(prompt: str = "", session: str = None) -> str:
     else:
         return input(prompt).strip()
 
-async def async_print(output, session: str = None):
+async def async_print(output, session: str = None, debug_message: bool = False):
     """
     Asynchronous print function that sends output to the WebSocket.
     """
-    if sys.argv[0] == "server.py" and session is not None:
+    if sys.argv[0] == "server.py" and session is not None and debug_message is False:
         print(session + ":" + output, flush=True)
         await asyncio.sleep(0.01)
     else:
-        print(output, flush=True)
+        print(f"Session-{session}: {output}", flush=True)

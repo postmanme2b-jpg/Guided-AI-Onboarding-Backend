@@ -142,11 +142,11 @@ class ChallengeArchitect:
         
         return workflow.compile()
 
-    async def print_section(self, title, content, emoji="📋"):
+    async def print_section(self, title, content, emoji = "📋", debug_message = False):
         """Helper function to print formatted sections"""
-        await async_print(f"\n{emoji} {title}", session=self.session)
+        await async_print(f"\n{emoji} {title}", session=self.session, debug_message=debug_message)
         # await async_print("=" * (len(title) + 4), session=self.session)
-        await async_print(content, session=self.session)
+        await async_print(content, session=self.session, debug_message=debug_message)
 
     async def process_challenge(self) -> Dict[str, Any]:
         """
@@ -171,7 +171,7 @@ Examples:
         user_prompt = await async_input("Your challenge description: ", session=self.session)
         if not user_prompt:
             user_prompt = "I want to build a food delivery app for students"  # fallback
-            await async_print(f"Using default prompt: {user_prompt}", session=self.session)
+            await async_print(f"Using default prompt: {user_prompt}", session=self.session, debug_message=True)
                     
         # Store the prompt in the class variable so nodes can access it
         initial_prompt = user_prompt
@@ -214,12 +214,14 @@ Examples:
         await self.print_section(
             "Scope Suggestions Log",
             json.dumps(final_state["suggestions_log"], indent=2),
-            "💡"
+            "💡",
+            debug_message=True
         ) 
         await self.print_section(
             "Specification Reasoning Trace", 
             json.dumps(final_state["reasoning_trace"], indent=2),
-            "🧠"
+            "🧠",
+            debug_message=True
         )
 
         # Return the final spec with reasoning trace

@@ -54,9 +54,9 @@ async def discuss_spec(state: Dict[str, Any]) -> Dict[str, Any]:
         state["temp_spec"] = spec
         await async_print(json.dumps(spec, indent=2), session=state["session"])
     if reasoning_trace:
-        await async_print("\n 🧠 Reasoning trace updated:", session=state["session"])
+        await async_print("\n 🧠 Reasoning trace updated:", session=state["session"], debug_message=True)
         state["reasoning_trace"] = reasoning_trace
-        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"])
+        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"], debug_message=True)
 
     if should_complete:
         state["spec"] = state.get("temp_spec") or state.get("spec", {})

@@ -1,77 +1,210 @@
-[{
-  "platform": "Topcoder",
-  "challenge_type": "development",
-  "fields": {
-    "title": { "required": true, "type": "String" },
-    "overview": { "required": true, "type": "String" },
-    "objectives": { "required": false, "type": "String" },
-    "requirements": { "required": true, "type": "String" },
-    "tech_stack": { "required": true, "type": "StringArray" },
-    "rules": { "required": false, "type": "String" },
-    "assets": { "required": false, "type": "String" },
-    "deliverables": { "required": true, "type": "String" },
-    "evaluation_criteria": { "required": false, "type": "String" },
-    "general_notes": { "required": false, "type": "String" },
-    "tags": { "required": true, "type": "StringArray" },
-    "timeline": {"required": true, "description": "Timeline in days", "schema": { "submission": {"type": "Number"}, "review": {"type": "Number"}, "appeals": {"type": "Number"}}}, 
-    "prize_structure": { "required": true,  "schema": [ { "type": "USD", "value": {"type": "Number"}}]}
+[
+  {
+    "platform": "Topcoder",
+    "challenge_type": "development",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "objectives": { "required": false, "type": "String" },
+      "requirements": { "required": true, "type": "String" },
+      "tech_stack": { "required": true, "type": "StringArray" },
+      "rules": { "required": false, "type": "String" },
+      "assets": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String" },
+      "evaluation_criteria": { "required": false, "type": "String" },
+      "general_notes": { "required": false, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": {
+        "required": true,
+        "description": "Timeline in days",
+        "schema": {
+          "submission": { "type": "Number" },
+          "review": { "type": "Number" },
+          "appeals": { "type": "Number" }
+        }
+      },
+      "prize_structure": {
+        "required": true,
+        "schema": [{ "type": "USD", "value": { "type": "Number" } }]
+      }
+    }
+  },
+  {
+    "platform": "Topcoder",
+    "challenge_type": "rtp",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "objectives": { "required": false, "type": "String" },
+      "requirements": { "required": true, "type": "String" },
+      "tech_stack": { "required": true, "type": "StringArray" },
+      "rules": { "required": false, "type": "String" },
+      "assets": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String", "description": "Please describe the prototype, including a link to the repository and deployment instructions." },
+      "evaluation_criteria": { "required": false, "type": "String" },
+      "general_notes": { "required": false, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": {
+        "required": true,
+        "description": "Timeline in days",
+        "schema": {
+          "submission": { "type": "Number" },
+          "review": { "type": "Number" },
+          "appeals": { "type": "Number" }
+        }
+      },
+      "prize_structure": {
+        "required": true,
+        "schema": [{ "type": "USD", "value": { "type": "Number" } }]
+      }
+    }
+  },
+  {
+    "platform": "Topcoder",
+    "challenge_type": "design",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "objectives": { "required": false, "type": "String" },
+      "requirements": { "required": true, "type": "String" },
+      "tech_stack": { "required": false, "type": "StringArray" },
+      "rules": { "required": false, "type": "String" },
+      "assets": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String" },
+      "judging_criteria": { "required": true, "type": "String" },
+      "general_notes": { "required": false, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": {
+        "required": true,
+        "description": "Timeline in days",
+        "schema": {
+          "submission": { "type": "Number" },
+          "review": { "type": "Number" },
+          "appeals": { "type": "Number" }
+        }
+      },
+      "prize_structure": {
+        "required": true,
+        "schema": [{ "type": "USD", "value": { "type": "Number" } }]
+      }
+    }
+  },
+  {
+    "platform": "Topcoder",
+    "challenge_type": "datascience",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "objectives": { "required": true, "type": "String" },
+      "requirements": { "required": true, "type": "String" },
+      "datasets": { "required": true, "type": "String" },
+      "tech_stack": { "required": false, "type": "StringArray" },
+      "rules": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String" },
+      "scoring": { "required": true, "type": "String" },
+      "general_notes": { "required": false, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": {
+        "required": true,
+        "description": "Timeline in days",
+        "schema": {
+          "submission": { "type": "Number" },
+          "review": { "type": "Number" },
+          "appeals": { "type": "Number" }
+        }
+      },
+      "prize_structure": {
+        "required": true,
+        "schema": [{ "type": "USD", "value": { "type": "Number" } }]
+      }
+    }
+  },
+  {
+    "platform": "Topcoder",
+    "challenge_type": "qa",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "objectives": { "required": false, "type": "String" },
+      "test_scope": { "required": false, "type": "String" },
+      "reporting_guidelines": { "required": true, "type": "String" },
+      "tech_stack": { "required": true, "type": "StringArray" },
+      "rules": { "required": false, "type": "String" },
+      "assets": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String" },
+      "scoring": { "required": false, "type": "String" },
+      "general_notes": { "required": false, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": {
+        "required": true,
+        "description": "Timeline in days",
+        "schema": {
+          "submission": { "type": "Number" },
+          "review": { "type": "Number" },
+          "appeals": { "type": "Number" }
+        }
+      },
+      "prize_structure": {
+        "required": true,
+        "schema": [{ "type": "USD", "value": { "type": "Number" } }]
+      }
+    }
+  },
+  {
+    "platform": "Wazoku",
+    "challenge_type": "ideation",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String", "description": "Describe the core question or topic for brainstorming." },
+      "objectives": { "required": false, "type": "String" },
+      "deliverables": { "required": true, "type": "String", "description": "Please submit your ideas as a brief text description." },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": { "required": true, "description": "Timeline in days" },
+      "prize_structure": { "required": false }
+    }
+  },
+    {
+    "platform": "Wazoku",
+    "challenge_type": "theoretical",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "requirements": { "required": true, "type": "String", "description": "Detail the requirements for the conceptual design." },
+      "deliverables": { "required": true, "type": "String", "description": "Submission should be a detailed document or presentation." },
+      "evaluation_criteria": { "required": true, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": { "required": true, "description": "Timeline in days" },
+      "prize_structure": { "required": true }
+    }
+  },
+  {
+    "platform": "Wazoku",
+    "challenge_type": "erfp",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "proposal_requirements": { "required": true, "type": "String", "description": "Outline the structure and content required for proposals." },
+      "deliverables": { "required": true, "type": "String", "description": "Submit a structured proposal." },
+      "evaluation_criteria": { "required": true, "type": "String" },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": { "required": true, "description": "Timeline in days" },
+      "prize_structure": { "required": false, "description": "Typically involves collaboration or funding, not direct prizes." }
+    }
+  },
+  {
+    "platform": "Wazoku",
+    "challenge_type": "prodigy",
+    "fields": {
+      "title": { "required": true, "type": "String" },
+      "overview": { "required": true, "type": "String" },
+      "problem_statement": { "required": true, "type": "String", "description": "Provide a detailed algorithmic problem statement." },
+      "dataset_url": { "required": true, "type": "String" },
+      "scoring_metric": { "required": true, "type": "String" },
+      "deliverables": { "required": true, "type": "String", "description": "Submit code that generates predictions for the test dataset." },
+      "tags": { "required": true, "type": "StringArray" },
+      "timeline": { "required": true, "description": "Timeline in days" },
+      "prize_structure": { "required": true }
+    }
   }
-},
-{
-  "platform": "Topcoder",
-  "challenge_type": "design",
-  "fields": {
-    "title": { "required": true, "type": "String" },
-    "overview": { "required": true, "type": "String" },
-    "objectives": { "required": false, "type": "String" },
-    "requirements": { "required": true, "type": "String" },
-    "tech_stack": { "required": false, "type": "StringArray" },
-    "rules": { "required": false, "type": "String" },
-    "assets": { "required": false, "type": "String" },
-    "deliverables": { "required": true, "type": "String" },
-    "judging_criteria": { "required": true, "type": "String" },
-    "general_notes": { "required": false, "type": "String"},
-    "tags": { "required": true, "type": "StringArray" },
-    "timeline": {"required": true, "description": "Timeline in days", "schema": { "submission": {"type": "Number"}, "review": {"type": "Number"}, "appeals": {"type": "Number"}}}, 
-    "prize_structure": { "required": true,  "schema": [ { "type": "USD", "value": {"type": "Number"}}]}
-  }
-},
-{
-  "platform": "Topcoder",
-  "challenge_type": "datascience",
-  "fields": {
-    "title": { "required": true, "type": "String" },
-    "overview": { "required": true, "type": "String" },
-    "objectives": { "required": true, "type": "String" },
-    "requirements": { "required": true, "type": "String" },
-    "datasets": { "required": true, "type": "String" },
-    "tech_stack": { "required": false, "type": "StringArray" },
-    "rules": { "required": false, "type": "String" },
-    "deliverables": { "required": true, "type": "String" },
-    "scoring": { "required": true, "type": "String" },
-    "general_notes": { "required": false, "type": "String" },
-    "tags": { "required": true, "type": "StringArray" },
-    "timeline": {"required": true, "description": "Timeline in days", "schema": { "submission": {"type": "Number"}, "review": {"type": "Number"}, "appeals": {"type": "Number"}}}, 
-    "prize_structure": { "required": true,  "schema": [ { "type": "USD", "value": {"type": "Number"}}]}
-  }
-},
-{
-  "platform": "Topcoder",
-  "challenge_type": "qa",
-  "fields": {
-    "title": { "required": true, "type": "String" },
-    "overview": { "required": true, "type": "String" },
-    "objectives": { "required": false, "type": "String" },
-    "test_scope": { "required": false, "type": "String" },
-    "reporting_guidelines": { "required": true, "type": "String" },
-    "tech_stack": { "required": true, "type": "StringArray" },
-    "rules": { "required": false, "type": "String" },
-    "assets": { "required": false, "type": "String" },
-    "deliverables": { "required": true, "type": "String" },
-    "scoring": { "required": false, "type": "String" },
-    "general_notes": { "required": false, "type": "String" },
-    "tags": { "required": true, "type": "StringArray" },
-    "timeline": {"required": true, "description": "Timeline in days", "schema": { "submission": {"type": "Number"}, "review": {"type": "Number"}, "appeals": {"type": "Number"}}}, 
-    "prize_structure": { "required": true,  "schema": [ { "type": "USD", "value": {"type": "Number"}}]}
-  }
-}]
+]
+

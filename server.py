@@ -6,15 +6,25 @@ This module sets up a FastAPI server with WebSocket support for real-time commun
 """
 
 import sys
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query, HTTPException
 from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 import uvicorn
 import asyncio
 from utils.input_handler import add_websocket_input_queue
 from agent.architect import ChallengeArchitect
+from agent.recommender import get_challenge_type_recommendations
+from agent.impact_recommender import get_impact_preview
+from agent.audience_recommender import get_audience_recommendations
+from agent.submission_recommender import get_submission_recommendations
+from agent.prize_recommender import get_prize_recommendations
+from agent.timeline_recommender import get_timeline_recommendations
+from agent.evaluation_recommender import get_evaluation_recommendations
+from agent.communications_recommender import get_communications_recommendations
+from agent.conflict_detector import detect_conflicts
 import json
-from typing import Dict, List
+from typing import Dict, List, Any
 import time
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -64,18 +74,177 @@ def custom_stdout_write(s):
         original_print_write(s)
 
 sys.stdout.write = custom_stdout_write
+sys.stdout.reconfigure(encoding='utf-8')
+
+# Pydantic models for API requests
+class RecommendationRequest(BaseModel):
+    problem_statement: str
+
+class ImpactPreviewRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class AudienceRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class SubmissionRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class PrizeRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class TimelineRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class EvaluationRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class CommunicationRecommendationRequest(BaseModel):
+    problem_statement: str
+    challenge_type: str
+
+class ValidationRequest(BaseModel):
+    challenge_data: Dict[str, Any]
+
+class SchemaRequest(BaseModel):
+    challenge_type: str
+    step_id: str
+
+
+@app.post("/api/recommendations")
+async def get_ai_recommendations(request: RecommendationRequest):
+    try:
+        recommendations = get_challenge_type_recommendations(request.problem_statement)
+        return {"recommendations": recommendations}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/impact-preview")
+async def get_ai_impact_preview(request: ImpactPreviewRequest):
+    try:
+        preview = get_impact_preview(request.problem_statement, request.challenge_type)
+        return preview
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/audience-recommendations")
+async def get_ai_audience_recommendations(request: AudienceRecommendationRequest):
+    try:
+        recommendations = get_audience_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/submission-recommendations")
+async def get_ai_submission_recommendations(request: SubmissionRecommendationRequest):
+    try:
+        recommendations = get_submission_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/prize-recommendations")
+async def get_ai_prize_recommendations(request: PrizeRecommendationRequest):
+    try:
+        recommendations = get_prize_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/timeline-recommendations")
+async def get_ai_timeline_recommendations(request: TimelineRecommendationRequest):
+    try:
+        recommendations = get_timeline_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/evaluation-recommendations")
+async def get_ai_evaluation_recommendations(request: EvaluationRecommendationRequest):
+    try:
+        recommendations = get_evaluation_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/communications-recommendations")
+async def get_ai_communications_recommendations(request: CommunicationRecommendationRequest):
+    try:
+        recommendations = get_communications_recommendations(
+            request.problem_statement,
+            request.challenge_type
+        )
+        return recommendations
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/validate-challenge")
+async def validate_challenge_configuration(request: ValidationRequest):
+    try:
+        analysis = detect_conflicts(request.challenge_data)
+        return analysis
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/get-schema-for-step")
+async def get_schema_for_step(request: SchemaRequest):
+    try:
+        with open("config/platform_schema.json", "r") as f:
+            schemas = json.load(f)
+
+        # Robust matching for challenge_type (case-insensitive and strips whitespace)
+        req_challenge_type = request.challenge_type.strip().lower()
+        challenge_schema = next((s for s in schemas if s["challenge_type"].strip().lower() == req_challenge_type), None)
+
+        if not challenge_schema:
+            print(f"DEBUG: Challenge type '{req_challenge_type}' not found in schema.")
+            raise HTTPException(status_code=404, detail=f"Challenge type '{req_challenge_type}' not found")
+
+        # This mapping defines which fields from the schema belong to which step
+        step_to_field_mapping = {
+            "submission-requirements": ["deliverables"],
+            "prize-configuration": ["prize_structure"],
+            "timeline-milestones": ["timeline"]
+            # Add other mappings here
+        }
+
+        required_fields = step_to_field_mapping.get(request.step_id, [])
+        step_schema = {key: value for key, value in challenge_schema["fields"].items() if key in required_fields}
+
+        return {"schema": step_schema}
+    except Exception as e:
+        # Log the actual error for debugging
+        print(f"ERROR in /api/get-schema-for-step: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/messages")
 async def get_messages(session: str = Query(...)):
-    """
-    HTTP GET endpoint to fetch messages for a given session ID.
-    """
     return {
         "session": session,
         "messages": messages.get(session, [])
     }
 
-# Endpoint WebSocket
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -89,12 +258,10 @@ async def websocket_endpoint(websocket: WebSocket):
     from utils.input_handler import websocket_input_queues
     input_queue = (websocket_input_queues or {}).get(session)
     if input_queue is None:
-        # Create a new input queue for this session
         input_queue = asyncio.Queue()
         add_websocket_input_queue(session, input_queue)
 
     if session not in instances:
-        # Create a new instance of ChallengeArchitect for this session
         instances[session] = ChallengeArchitect(session=session)
         asyncio.create_task(instances[session].process_challenge())
 
@@ -125,3 +292,4 @@ app.router.lifespan_context = lifespan
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+

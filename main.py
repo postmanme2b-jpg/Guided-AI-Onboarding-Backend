@@ -3,8 +3,10 @@
 Main entry point for the CLI app of the AI Agent Challenge Spec Generator.
 """
 
-import json
+import sys
 from agent.architect import ChallengeArchitect
+
+sys.stdout.reconfigure(encoding='utf-8')
 
 async def main():
     try:

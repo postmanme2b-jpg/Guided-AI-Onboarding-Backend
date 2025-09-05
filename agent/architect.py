@@ -203,13 +203,22 @@ Examples:
         # Execute the LangGraph workflow
         final_state = await self.workflow.ainvoke(initial_state)
 
-        await async_print("## 🎉 CHALLENGE SPECIFICATION GENERATION IS COMPLETED! 🎉", session=self.session)
+        # Construct and send the final, structured message to the frontend.
+        # This ensures the frontend reliably knows the process is complete.
+        final_message_to_frontend = {
+            "message": "The challenge specification has been finalized. You can now proceed to the next step.",
+            "completed": True,
+            "work_scope": final_state.get("scope", {}),
+            "final_spec": final_state.get("spec", {})
+        }
+        await async_print(json.dumps(final_message_to_frontend), session=self.session)
 
-        # Show the generated specification
+
         await self.print_section(
             "Generated Challenge Specification", 
             json.dumps(final_state["spec"], indent=2),
-            "📋"
+            "📋",
+            debug_message=True
         )
         await self.print_section(
             "Scope Suggestions Log",
@@ -228,5 +237,4 @@ Examples:
         return {
             "spec": final_state["spec"],
             "reasoning_trace": final_state["reasoning_trace"],
-            # "conversation_history": serializable_conversation
         }

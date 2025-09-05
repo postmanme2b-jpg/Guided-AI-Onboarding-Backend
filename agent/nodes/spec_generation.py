@@ -41,10 +41,7 @@ async def generate_spec(state: Dict[str, Any]) -> Dict[str, Any]:
     try:
         analysis = json.loads(response.content)
     except json.JSONDecodeError:
-        # Fallback for robust operation
-        analysis = {
-            "completed": False,
-        }
+        analysis = { "completed": False }
     
     should_complete = analysis.get("completed")
     ai_question = analysis.get("message")
@@ -58,20 +55,26 @@ async def generate_spec(state: Dict[str, Any]) -> Dict[str, Any]:
         state["spec"] = spec
         state["reasoning_trace"] = reasoning_trace
 
-        await async_print("\n🎉 Excellent! We have generated the challenge specification. Here's the formatted specification:", session=state["session"])
-        await async_print(json.dumps(spec, indent=2), session=state["session"])
+        final_message = {
+            "message": ai_question or "Excellent! We have generated the challenge specification. Here's the formatted specification:",
+            "specification": spec,
+            "reasoning_trace": reasoning_trace,
+            "completed": True
+        }
+        await async_print(json.dumps(final_message), session=state["session"])
 
-        await async_print("\n 🧠 Reasoning trace:", session=state["session"], debug_message=True)
-        await async_print(json.dumps(reasoning_trace, indent=2), session=state["session"], debug_message=True)
+    else:
+        # If the conversation is not complete, send the AI's question back to the user.
+        message_to_user = {
+            "message": ai_question
+        }
+        await async_print(json.dumps(message_to_user), session=state["session"])
 
-    # Continue conversation with next question
-    await async_print(f"\n🤖 AI: {ai_question}", session=state["session"])
-    
-    # Get next user response
+    # Always wait for user input after sending a message
     user_response = await async_input("\n🧑 You: ", session=state["session"])
     
     if not user_response:
-        user_response = "I'm not sure, can you suggest something?"
+        user_response = "Looks good, let's proceed."
     
     if should_complete:
         state["discuss_spec_conversation"].append(
@@ -83,3 +86,4 @@ async def generate_spec(state: Dict[str, Any]) -> Dict[str, Any]:
         )
     
     return state
+

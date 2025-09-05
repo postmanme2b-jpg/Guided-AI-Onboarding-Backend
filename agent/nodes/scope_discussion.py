@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, Any
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 import json
@@ -30,40 +30,34 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
     try:
         analysis = json.loads(response.content)
     except json.JSONDecodeError:
-        # Fallback for robust operation
-        analysis = {
-            "completed": False,
-        }
-        
-    # COMPLETION LOGIC: Determine if conversation should continue
+        analysis = {"completed": False, "message": "I'm having a little trouble processing that. Could you try rephrasing?"}
+
     should_complete = analysis.get("completed")
     ai_question = analysis.get("message", "")
     state["discuss_scope_conversation"].append(
         AIMessage(content=json.dumps(analysis))
     )
 
-    if should_complete:
-        # Signal completion with summary of gathered information
-        await async_print("\n🎉 Excellent! We have decided the scope of the challenge. Here's the summary:", session=state["session"])
+    # Standardize all outgoing messages to be JSON
+    message_to_send = {"message": ai_question}
 
+    if should_complete:
         work_scope = analysis.get("work_scope", {})
         suggestions = analysis.get("suggestions", [])
         
-        # Display gathered information for user confirmation
-        await async_print(json.dumps({"challenge_type": work_scope.get('type', 'No type provided')}), session=state["session"])
-        await async_print(json.dumps({"description": work_scope.get('description', 'No description provided')}), session=state["session"])
-        await async_print(json.dumps({"suggestion_reasoning": analysis.get('suggestions', 'No reasoning provided')}), session=state["session"], debug_message=True)
+        # Add completion data to the final message
+        message_to_send["message"] = "Excellent! We have decided the scope of the challenge. Here's the summary:"
+        message_to_send["work_scope"] = work_scope
+        message_to_send["completed"] = True
+
+        await async_print(json.dumps(message_to_send), session=state["session"])
         
         state["scope"] = work_scope
         state["suggestions_log"] = suggestions
-
         return state
     else:
-        # Continue conversation with next question
-        
-        await async_print(f"\n🤖 AI: {ai_question}", session=state["session"])
-        
-        # Get next user response
+        await async_print(json.dumps(message_to_send), session=state["session"])
+
         user_response = await async_input("\n🧑 You: ", session=state["session"])
         
         if not user_response:
@@ -74,4 +68,3 @@ async def discuss_scope(state: Dict[str, Any]) -> Dict[str, Any]:
         )
         
         return state
-    

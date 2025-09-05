@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Any
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
+from dotenv import load_dotenv
 import os
 
 from agent.nodes.scope_discussion import discuss_scope
@@ -36,6 +37,8 @@ from utils.rag import RAGHelper
 
 from utils.schema import ChallengeState
 from utils.input_handler import async_print, async_input
+
+load_dotenv()
 
 class ChallengeArchitect:
     """

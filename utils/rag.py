@@ -1,6 +1,7 @@
 import openai
 from qdrant_client import QdrantClient
 from typing import Optional
+from dotenv import load_dotenv
 import os
 
 from config.config import (
@@ -9,6 +10,8 @@ from config.config import (
     RAG_EMBEDDING_MODEL,
     RAG_NUM_RETRIEVED_CHALLENGES
 )
+
+load_dotenv()
 
 # === Setup clients ===
 
